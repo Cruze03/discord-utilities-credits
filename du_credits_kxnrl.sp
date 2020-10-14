@@ -20,7 +20,7 @@ public Plugin myinfo =
 	name = "Discord Utilities: Credits",
 	author = "Cruze",
 	description = "Give credits to users that are verified!",
-	version = "1.0",
+	version = "1.1",
 	url = "http://steamcommunity.com/profiles/76561198132924835"
 };
 
@@ -73,7 +73,7 @@ public int SQLQuery_Connect(Handle owner, Handle hndl, char[] error, any data)
 		}
 		else
 		{
-			g_hDB.Format(buffer, sizeof(buffer), "ALTER TABLE %s ADD COLUMN IF NOT EXISTS gotCredits int(20) NOT NULL DEFAULT 0 AFTER last_accountuse;", g_sTableName);
+			g_hDB.Format(buffer, sizeof(buffer), "ALTER TABLE %s ADD COLUMN gotCredits int(5) DEFAULT '0'", g_sTableName);
 		}
 		SQL_TQuery(g_hDB, SQLQuery_ConnectCallback, buffer);
 	}
@@ -83,7 +83,12 @@ public int SQLQuery_ConnectCallback(Handle owner, Handle hndl, char[] error, any
 {
 	if(hndl == INVALID_HANDLE)
 	{
+		if(!g_bIsMySQL && StrContains(error, "duplicate", false) != -1)
+		{
+			return;
+		}
 		LogError("[DU-Credits-ConnectCallback] Database failure: %s", error);
+		return;
 	}
 	for(int i = 1; i <= MaxClients; i++)
 	{
